@@ -71,7 +71,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 ClusterRole name
 */}}
 {{- define "kubetail.clusterRoleName" -}}
-{{ if .Values.clusterRole.name }}{{ .Values.clusterRole.name }}{{ else }}{{ include "kubetail.fullname" . }}{{ end }}
+{{ if .Values.rbac.roleName }}{{ .Values.rbac.roleName }}{{ else if and .Values.clusterRole .Values.clusterRole.name }}{{ .Values.clusterRole.name }}{{ else }}{{ include "kubetail.fullname" . }}{{ end }}
 {{- end }}
 
 
@@ -87,4 +87,15 @@ ServiceAccount name
 */}}
 {{- define "kubetail.serviceAccountName" -}}
 {{ if .Values.serviceAccount.name }}{{ .Values.serviceAccount.name }}{{ else }}{{ include "kubetail.fullname" . }}{{ end }}
+{{- end }}
+
+{{/*
+config
+*/}}
+{{- define "kubetail.config" -}}
+addr: :{{ .Values.deployment.containerPort }}
+auth-mode: {{ .Values.authMode }}
+{{- with .Values.config }}
+{{- tpl (toYaml .) $ | nindent 0 }}
+{{- end }}
 {{- end }}

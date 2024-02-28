@@ -1,13 +1,13 @@
 {{- if eq .Values.authMode "cluster" }}
-kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
+kind: {{ .Values.rbac.namespaced | ternary "RoleBinding" "ClusterRoleBinding" }}
 metadata:
-  name: {{ if .Values.clusterRoleBinding.name }}{{ .Values.clusterRoleBinding.name }}{{ else }}{{ include "kubetail.fullname" . }}{{ end }}
+  name: {{ if .Values.rbac.roleBindingName }}{{ .Values.rbac.roleBindingName }}{{ else if and .Values.clusterRoleBinding .Values.clusterRoleBinding.name }}{{ .Values.clusterRoleBinding.name }}{{ else }}{{ include "kubetail.fullname" . }}{{ end }}
   labels:
     {{- include "kubetail.labels" $ | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
+  kind: {{ .Values.rbac.namespaced | ternary "Role" "ClusterRole" }}
   name: {{ include "kubetail.clusterRoleName" . }}
 subjects:
 - kind: ServiceAccount

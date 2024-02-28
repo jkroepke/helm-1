@@ -16,14 +16,19 @@ spec:
       labels:
         {{- include "kubetail.labels" $ | nindent 8 }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/config-map.yaml") . | sha256sum }}
+        checksum/config: {{ include "kubetail.config" . | sha256sum }}
     spec:
+      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
       {{- if eq .Values.authMode "cluster" }}
       serviceAccountName: {{ include "kubetail.serviceAccountName" . }}
       {{- end }}
+      securityContext:
+        {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
       containers:
       - name: kubetail
         image: {{ .Values.image.registry }}:{{ default .Chart.AppVersion .Values.image.tag }}
+        securityContext:
+          {{- toYaml .Values.deployment.securityContext | nindent 12 }}
         {{- if .Values.image.pullPolicy }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- end }}
@@ -47,6 +52,21 @@ spec:
         - name: config
           mountPath: /etc/kubetail
           readOnly: true
+      {{- with .Values.deployment.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
       volumes:
       - name: config
         configMap:

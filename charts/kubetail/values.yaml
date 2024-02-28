@@ -23,13 +23,11 @@ image:
   tag:
   pullPolicy:
 
-# cluster-role options
-clusterRole:
-  name:
 
-# cluster-role-binding options
-clusterRoleBinding:
-  name:
+rbac:
+  namespaced: false
+  roleName: ""
+  roleBindingName: ""
   rules:
   - apiGroups:
     - ""
@@ -77,16 +75,41 @@ deployment:
     requests:
       cpu: 100m
       memory: 100Mi
+  automountServiceAccountToken: true
+  podAnnotations: {}
+  podSecurityContext:
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+  affinity: {}
+  nodeSelector:
+    kubernetes.io/os: linux
+  tolerations: {}
+  priorityClassName: ""
 
 # service options
 service:
+  annotations: {}
   name:
   type: ClusterIP
   port: 4000
 
 # service-account options
 serviceAccount:
-  name:
+  create: true
+  annotations: {}
+  name: ""
+  automountServiceAccountToken: false
 
 # ingress options
 ingress:
@@ -95,6 +118,7 @@ ingress:
 
 # kubetail config (see https://github.com/kubetail-org/kubetail for defaults)
 config:
+  # namespace: '{{ .Release.Namespace }}'
   session:
     secret: REPLACEME
   csrf:

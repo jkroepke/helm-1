@@ -1,12 +1,19 @@
 {{- if eq .Values.authMode "cluster" }}
-kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
+kind: {{ .Values.rbac.namespaced | ternary "Role" "ClusterRole" }}
 metadata:
   name: {{ include "kubetail.clusterRoleName" . }}
   labels:
     {{- include "kubetail.labels" $ | nindent 4 }}
-{{- with .Values.clusterRoleBinding.rules }}
+{{- if and .Values.clusterRoleBinding .Values.clusterRoleBinding.rules }}
+  {{- with .Values.clusterRoleBinding.rules }}
 rules:
 {{- toYaml . | nindent 0 }}
+  {{- end }}
+{{-  else }}
+  {{- with .Values.rbac.rules }}
+rules:
+{{- toYaml . | nindent 0 }}
+  {{- end }}
 {{- end }}
 {{- end -}}
