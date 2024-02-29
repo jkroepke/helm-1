@@ -31,7 +31,7 @@ spec:
       - name: kubetail
         image: {{ .Values.image.registry }}:{{ default .Chart.AppVersion .Values.image.tag }}
         securityContext:
-          {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+          {{- toYaml .Values.deployment.securityContext | nindent 10 }}
         {{- if .Values.image.pullPolicy }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- end }}
