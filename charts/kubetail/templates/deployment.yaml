@@ -17,6 +17,9 @@ spec:
         {{- include "kubetail.labels" $ | nindent 8 }}
       annotations:
         checksum/config: {{ include "kubetail.config" . | sha256sum }}
+        {{- with .Values.deployment.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
       {{- if eq .Values.authMode "cluster" }}
